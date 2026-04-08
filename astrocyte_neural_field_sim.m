@@ -86,32 +86,113 @@ end
 
 
 %%
+Code to generate figures 2 and 7. Requires running the simulation above to create the initial condition U(:,1), Q(:,1) and A(:,1) as well as simulated values after perturbation.
+
+% Creates figures 2 and
 
 
-% Code in this section creates Figures 2 and 3.
+% Figure 2
+
+% These values are estimates of where bumps transition from stable to unstable for a
+% particular theta value (theta=0.03 for beta_cut1 and theta=0.3 for
+% beta_cut2) as predicted by the stability analysis of section 4.
+
+beta_cut1 = 0.0255017;   % For theta=0.03
+beta_cut2 = 0.01987;     % For theta=0.3
+
+% First curve theta=0.03
+theta1 = 0.03;    
+betas1 = linspace(0.001,beta_cut1,600);  %beta values up to where he stable region ends
+
+Delta_sols1 = zeros(size(betas1));
+Deltaguess = 1.5;
+for k = 1:length(betas1)
+    b = betas1(k);
+    f = @(D) theta1-((b+2*gamma*D/pi-sqrt(b^2+4*b*gamma*D/pi))/(2*gamma*D/pi)).*sin(2*D);
+    Delta0 = Deltaguess;
+    Delta_sols1(k) = fsolve(f,Delta0);
+end
 
 
+beta1  = linspace(0.001,20,400); % beta and delta values for a full contour, ignoring which regions are stable
+Deltap1 = linspace(0.01,pi/2,400);  
 
-% Creates the plots for Figure 7. Requires first running a finite difference simulation with a perturbation to the activity variable.
+[B1, D1] = meshgrid(beta1,Deltap1);
+c0 = (B1+2*gamma*D1/pi-sqrt(B1.^2+4*B1*gamma.*D1/pi))./(2*gamma*D1/pi);
+F1 = theta1-c0.*sin(2*D1);
+
+
+% Second curve theta=0.3
+theta2 = 0.3;    
+betas2 = linspace(0.001,beta_cut2,600); %beta values up to where he stable region ends
+
+Delta_sols2 = zeros(size(betas2));
+Deltaguess = 1.5;
+for k = 1:length(betas2)
+    b = betas2(k);
+    f = @(D) theta2-((b+2*gamma*D/pi-sqrt(b^2+4*b*gamma*D/pi))/(2*gamma*D/pi)).*sin(2*D);
+    Delta0 = Deltaguess;
+    Delta_sols2(k) = fsolve(f,Delta0);
+end
+
+beta2 = linspace(0.001,5,400); % beta and delta values for a full contour, ignoring which regions are stable 
+Deltap2 = linspace(0.01,pi/2,400);   
+
+[B2, D2] = meshgrid(beta2,Deltap2);
+c0 = (B2+2*gamma*D2/pi-sqrt(B2.^2+4*B2*gamma.*D2/pi))./(2*gamma*D2/pi);
+F2 = theta2-c0.*sin(2*D2);
+
+
+% Figure requires running finite difference simulation to first to obtain
+% U(:,1), Q(:,1) and A(:,1).
+
+figure('Color','w','Position',[100 100 900 700])
+tiledlayout(1,2,'Padding','compact','TileSpacing','compact')
+
+nexttile
+plot(x,Q(:,1),'k-.','LineWidth',5); hold on;
+plot(x,A(:,1),'k--','LineWidth',5)
+plot(x,U(:,1),'k-','LineWidth',5)
+
+[~, i] = min(abs(x-Delta)); % indices for dots where the active region boundaries are
+[~, j] = min(abs(x+Delta));
+
+plot(x(i), U(i,k),'ro','MarkerSize',12,'MarkerFaceColor','r');
+plot(x(j), U(j,k),'ro','MarkerSize',12,'MarkerFaceColor','r');
+xlim([-pi,pi])
+xlabel('x','FontSize',20);
+
+nexttile
+hold on
+contour(B1,D1,F1,[0 0],'k--','LineWidth',5);
+contour(B2,D2,F2,[0 0],'k--','LineWidth',5);
+plot(betas2,Delta_sols2,'k','LineWidth',5);
+plot(betas1,Delta_sols1,'k','LineWidth',5);
+
+ylim([0,pi/2+0.1])
+xlim([0,24])
+set(gca,'XScale','log');
+xlabel('\beta','FontSize',20);
+ylabel('\Delta','FontSize',20);
 
 figure;
 t = tiledlayout(2,3);
 
 ax4 = nexttile;
-plot(ax4, x, Q(:,70), '-','Color',[0 0.6 0.3 1], 'LineWidth',7.5); hold on;
+plot(ax4, x, Q(:,70),'-','Color',[0 0.6 0.3 1], 'LineWidth',7.5); hold on;
 plot(ax4,x, Q(:,1), ':','Color',[0 0.6 0.3 0.5],'LineWidth',7.5)
 xlim([-pi,pi])
 ylim([0.77,1.05])
 
 ax5 = nexttile;
-plot(ax5, x, Q(:,3000), '-','Color',[0 0.6 0.3 1], 'LineWidth',7.5); hold on;
+plot(ax5, x, Q(:,3000),'-','Color',[0 0.6 0.3 1], 'LineWidth',7.5); hold on;
 plot(ax5,x, Q(:,1), ':','Color',[0 0.6 0.3 0.5],'LineWidth',7.5)
 xlim([-pi,pi])
 ylim([0.77,1.05])
 
 
 ax6 = nexttile;
-plot(ax6, x, Q(:,10000), '-','Color',[0 0.6 0.3 1], 'LineWidth',7.5); hold on;
+plot(ax6, x, Q(:,10000),'-','Color',[0 0.6 0.3 1], 'LineWidth',7.5); hold on;
 plot(ax6,x, Q(:,1), ':','Color',[0 0.6 0.3 0.5],'LineWidth',7.5)
 xlim([-pi,pi])
 ylim([0.77,1.05])
@@ -133,7 +214,7 @@ ylim([0.092,0.108])
 
 ax9 = nexttile;
 plot(ax9, x, A(:,10000), '-','Color',[0.85 0.35 0.75 1], 'LineWidth',7.5); hold on;
-plot(ax9,x, A(:,1), ':','Color',[0.85 0.35 0.75 0.5],'LineWidth',7.5)
+plot(ax9,x, A(:,1),':','Color',[0.85 0.35 0.75 0.5],'LineWidth',7.5)
 xlim([-pi,pi])
 ylim([0.092,0.108])
 

@@ -2,10 +2,10 @@
 %
 % Runs a simulation of the astrocyte-neural field model for specified initial conditions 
 % Currently setup to run a simulation with IC near the stationary bump solution
-% derived for the model with a right shift perturbation.
+% derived for the model with a right shift perturbation. Generates Figure
+% 7.
 
-
-% Spatial and temporal gride and spacing.
+% Spatial and temporal grids and spacing.
 N = 3000;    
 dx = 2*pi/N;    
 x = linspace(-pi,pi-dx,N)'; 
@@ -80,18 +80,60 @@ for k=1:nt -1
 end
 
 
+% Figure 7
+
+figure;
+t = tiledlayout(2,3);
+
+ax4 = nexttile;
+plot(ax4, x, Q(:,70),'-','Color',[0 0.6 0.3 1], 'LineWidth',7.5); hold on;
+plot(ax4,x, Q(:,1), ':','Color',[0 0.6 0.3 0.5],'LineWidth',7.5)
+xlim([-pi,pi])
+ylim([0.77,1.05])
+
+ax5 = nexttile;
+plot(ax5, x, Q(:,3000),'-','Color',[0 0.6 0.3 1], 'LineWidth',7.5); hold on;
+plot(ax5,x, Q(:,1), ':','Color',[0 0.6 0.3 0.5],'LineWidth',7.5)
+xlim([-pi,pi])
+ylim([0.77,1.05])
+
+
+ax6 = nexttile;
+plot(ax6, x, Q(:,10000),'-','Color',[0 0.6 0.3 1], 'LineWidth',7.5); hold on;
+plot(ax6,x, Q(:,1), ':','Color',[0 0.6 0.3 0.5],'LineWidth',7.5)
+xlim([-pi,pi])
+ylim([0.77,1.05])
+
+
+ax7 = nexttile;
+plot(ax7, x, A(:,70), '-','Color',[0.85 0.35 0.75 1], 'LineWidth',7.5); hold on;
+plot(ax7,x, A(:,1), ':','Color',[0.85 0.35 0.75 0.5],'LineWidth',7.5)
+xlim([-pi,pi])
+ylim([0.092,0.108])
+
+
+ax8 = nexttile;
+plot(ax8, x, A(:,3000), '-','Color',[0.85 0.35 0.75 1], 'LineWidth',7.5); hold on;
+plot(ax8,x, A(:,1), ':','Color',[0.85 0.35 0.75 0.5],'LineWidth',7.5)
+xlim([-pi,pi])
+ylim([0.092,0.108])
+
+
+ax9 = nexttile;
+plot(ax9, x, A(:,10000), '-','Color',[0.85 0.35 0.75 1], 'LineWidth',7.5); hold on;
+plot(ax9,x, A(:,1),':','Color',[0.85 0.35 0.75 0.5],'LineWidth',7.5)
+xlim([-pi,pi])
+ylim([0.092,0.108])
+
+
+
 function c0 = czero(delta, beta, gamma)  
     c0 = (beta+2*(gamma*delta/pi)-sqrt(beta^2+4*beta*gamma*delta/pi))./(2*(gamma*delta/pi));
 end
 
 
 %%
-%Code to generate figures 2 and 7. Requires running the simulation above to create the initial condition U(:,1), Q(:,1) and A(:,1) as well as simulated values after perturbation.
-
-% Creates figures 2 and
-
-
-% Figure 2
+% Generates figure 2. Does not require initial simulation above.
 
 % These values are estimates of where bumps transition from stable to unstable for a
 % particular theta value (theta=0.03 for beta_cut1 and theta=0.3 for
@@ -143,78 +185,65 @@ c0 = (B2+2*gamma*D2/pi-sqrt(B2.^2+4*B2*gamma.*D2/pi))./(2*gamma*D2/pi);
 F2 = theta2-c0.*sin(2*D2);
 
 
-% Figure requires running finite difference simulation to first to obtain
-% U(:,1), Q(:,1) and A(:,1).
+
+
+N = 3000;    
+dx = 2*pi/N;    
+x = linspace(-pi,pi-dx,N)';
+
+gamma = 2; % Synaptic replenishment rate
+beta = 0.1; % Synaptic depletion rate
+tau = 1; % Synaptic depression timescale
+D = 0.3; % Astrocytic resource diffusion constant
+theta = 0.03; %Neural activity threshold
+
+
+% Use threshold condition to find the bump half-width
+
+f = @(delta) czero(delta,beta,gamma).*sin(2*delta)-theta;
+initial_guess = 1.5; 
+Delta = fzero(f, initial_guess);
+
+% Compute astrocyte resource amplitude and synaptic resource amplitude in the active region for
+% stationary bump solutions.
+
+kappa = Delta/pi;
+c0 = czero(Delta,beta,gamma);
+A0 = kappa*(1-c0);
+epsilon = 0.3*(2*c0*sin(Delta));
+
+
+% Initial conditions: stationary bump profile of section 3
+
+Ust = (2*c0*sin(Delta)).*cos(x);
+Ast = A0;
+Qst = (c0).*((x>-Delta) & (x<Delta))+1.*((x>Delta)|(x<-Delta));
 
 figure('Color','w','Position',[100 100 900 700])
 tiledlayout(1,2,'Padding','compact','TileSpacing','compact')
 
 nexttile
-plot(x,Q(:,1),'k-.','LineWidth',5); hold on;
-plot(x,A(:,1),'k--','LineWidth',5)
-plot(x,U(:,1),'k-','LineWidth',5)
+plot(x,Qst,'k-.','LineWidth',5); hold on;
+plot(x,Ast,'k--','LineWidth',5)
+plot(x,Ust,'k-','LineWidth',5)
 
 [~, i] = min(abs(x-Delta)); % indices for dots where the active region boundaries are
 [~, j] = min(abs(x+Delta));
 
-plot(x(i), U(i,k),'ro','MarkerSize',12,'MarkerFaceColor','r');
-plot(x(j), U(j,k),'ro','MarkerSize',12,'MarkerFaceColor','r');
+plot(x(i),Ust(i),'ro','MarkerSize',12,'MarkerFaceColor','r');
+plot(x(j),Ust(j),'ro','MarkerSize',12,'MarkerFaceColor','r');
 xlim([-pi,pi])
 xlabel('x','FontSize',20);
 
 nexttile
 hold on
-contour(B1,D1,F1,[0 0],'k--','LineWidth',5);
-contour(B2,D2,F2,[0 0],'k--','LineWidth',5);
-plot(betas2,Delta_sols2,'k','LineWidth',5);
-plot(betas1,Delta_sols1,'k','LineWidth',5);
+contour(B1,D1,F1,[0 0],'r--','LineWidth',5);
+contour(B2,D2,F2,[0 0],'r--','LineWidth',5);
+plot(betas2,Delta_sols2,'k','LineWidth',6);
+plot(betas1,Delta_sols1,'k','LineWidth',6);
 
 ylim([0,pi/2+0.1])
 xlim([0,24])
 set(gca,'XScale','log');
 xlabel('\beta','FontSize',20);
 ylabel('\Delta','FontSize',20);
-
-figure;
-t = tiledlayout(2,3);
-
-ax4 = nexttile;
-plot(ax4, x, Q(:,70),'-','Color',[0 0.6 0.3 1], 'LineWidth',7.5); hold on;
-plot(ax4,x, Q(:,1), ':','Color',[0 0.6 0.3 0.5],'LineWidth',7.5)
-xlim([-pi,pi])
-ylim([0.77,1.05])
-
-ax5 = nexttile;
-plot(ax5, x, Q(:,3000),'-','Color',[0 0.6 0.3 1], 'LineWidth',7.5); hold on;
-plot(ax5,x, Q(:,1), ':','Color',[0 0.6 0.3 0.5],'LineWidth',7.5)
-xlim([-pi,pi])
-ylim([0.77,1.05])
-
-
-ax6 = nexttile;
-plot(ax6, x, Q(:,10000),'-','Color',[0 0.6 0.3 1], 'LineWidth',7.5); hold on;
-plot(ax6,x, Q(:,1), ':','Color',[0 0.6 0.3 0.5],'LineWidth',7.5)
-xlim([-pi,pi])
-ylim([0.77,1.05])
-
-
-ax7 = nexttile;
-plot(ax7, x, A(:,70), '-','Color',[0.85 0.35 0.75 1], 'LineWidth',7.5); hold on;
-plot(ax7,x, A(:,1), ':','Color',[0.85 0.35 0.75 0.5],'LineWidth',7.5)
-xlim([-pi,pi])
-ylim([0.092,0.108])
-
-
-ax8 = nexttile;
-plot(ax8, x, A(:,3000), '-','Color',[0.85 0.35 0.75 1], 'LineWidth',7.5); hold on;
-plot(ax8,x, A(:,1), ':','Color',[0.85 0.35 0.75 0.5],'LineWidth',7.5)
-xlim([-pi,pi])
-ylim([0.092,0.108])
-
-
-ax9 = nexttile;
-plot(ax9, x, A(:,10000), '-','Color',[0.85 0.35 0.75 1], 'LineWidth',7.5); hold on;
-plot(ax9,x, A(:,1),':','Color',[0.85 0.35 0.75 0.5],'LineWidth',7.5)
-xlim([-pi,pi])
-ylim([0.092,0.108])
-

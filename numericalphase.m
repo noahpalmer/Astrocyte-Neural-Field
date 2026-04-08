@@ -124,7 +124,7 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
                     A = Anew;
                     Q = Qnew;
                 end
-                velocity(j,i) = abs(dcom);
+                velocity(j,i) = abs(dcom)/dt;
                 drift(j,i) = com_total;
             end
         end

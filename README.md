@@ -16,4 +16,4 @@ The code within this repository can be used to simulate and analyze stationary b
   Auxiliary function used to compute the Evans function for analyticphase.m.
 
 **Requirements:**
-All code was run on MATLAB Version: 24.1.0.2603908 (R2024a) Update 3. 
+All code was run on MATLAB Version: 24.1.0.2603908 (R2024a) Update 3 on a Windows 11 Home operating system.

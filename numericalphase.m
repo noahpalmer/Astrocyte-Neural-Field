@@ -50,6 +50,8 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
         velocity = zeros(length(beta_vals),length(D_vals));
         drift = zeros(length(beta_vals),length(D_vals));
         gamma = gamma_vals;
+        totaliterations = length(beta_vals)*length(D_vals);
+        iter = 0;
         for i = 1:length(D_vals)
             D = D_vals(i);
 
@@ -127,15 +129,26 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
                 end
                 velocity(j,i) = abs(dcom)/dt;
                 drift(j,i) = com_total;
+
+                iter = iter + 1;
+                elapsedtime = toc(starttime);
+                percent = (iter/totaliterations)*100;
+                totaltime = elapsedtime/iter*totaliterations;
+                remainingtime = totaltime-elapsedtime;
+
+                fprintf('\rProgress: %6.2f%% | Elapsed: %6.1fs | Estimated Remaining Time: %6.1fs',percent, elapsedtime, remainingtime);
             end
         end
     else
         velocity = zeros(length(beta_vals),length(gamma_vals));
         drift = zeros(length(beta_vals),length(gamma_vals));
         D = D_vals;
+        totaliterations = length(beta_vals)*length(gamma_vals);
 
         LA = IA-(dt*D)*D2;
         LAdec = decomposition(LA,'lu');
+
+        iter = 0;
 
         for i = 1:length(gamma_vals)
 
@@ -210,13 +223,22 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
                     end
                     velocity(j,i) = abs(dcom)/dt;
                     drift(j,i) = com_total;
+
+                    iter = iter + 1;
+                    elapsedtime = toc(starttime);
+                    percent = (iter/totaliterations)*100;
+                    totaltime = elapsedtime/iter*totaliterations;
+                    remainingtime = totaltime-elapsedtime;
+
+                    fprintf('\rProgress: %6.2f%% | Elapsed: %6.1fs | Estimated Remaining Time: %6.1fs',percent, elapsedtime, remainingtime);
                 end
          end
     end
-    fprintf('Time elapsed: %.0f seconds\n',toc(starttime));
+    fprintf('\nTime elapsed: %.0f seconds\n',toc(starttime));
 end
 
 
 function c0 = czero(delta,beta,gamma)  
     c0 = (beta+2*(gamma*delta/pi)-sqrt(beta^2+4*beta*gamma*delta/pi))./(2*(gamma*delta/pi));
 end
+

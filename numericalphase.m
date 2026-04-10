@@ -58,13 +58,12 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
             LA = IA-(dt*D)*D2;
             LAdec = decomposition(LA,'lu');
         
-            Delta_prev = 1.5; % Initial guess is for larger bump
+            Delta_prev = 1.5; % Initial guess for bump half-with. Steup for the larger bump
         
             for j = 1:length(beta_vals)
-        
                 beta = beta_vals(j);
         
-                % Solve for $\Delta$
+                % Solve for bump half-width
                 f = @(delta) czero(delta,beta,gamma).*sin(2*delta)-theta;
                 Delta = fzero(f,Delta_prev);
                 Delta_prev = Delta;
@@ -74,7 +73,7 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
                 A0 = kappa*(1-c0);
                 epsilon = 0.05*(2*c0*sin(Delta));  %Perturbation size epsilon taken to be 0.05 of maximum height stationary solution
         
-                % Initial conditions
+                % Initial conditions taken to be the stationary solution with a perturbation just to the activity variable
                 U = (2*c0*sin(Delta))*cosx+epsilon*sin(x);
                 A = A0;
                 Q = c0*((x>-Delta)&(x<Delta))+((x>Delta)|(x<-Delta));
@@ -88,19 +87,17 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
                 com_start = atan2(S0,C0);
                 com_old = com_start;
                 com_total = 0;
-
-        
+                
                 for k = 1:nt-1
         
                     H = (U > theta);
                     QHu = Q.*H;
-        
                     fcos = cx*QHu;
                     fsin = sx*QHu;
+
                     Unew = (1-dt)*U+dt*(fcos*cosx+fsin*sinx);
         
-                    % Update center of mass and compute speed.
-                    
+                    % Update center of mass and compute speed
                     C = (cx*Unew)/mass;
                     S = (sx*Unew)/mass;
                     com_new = atan2(S,C);
@@ -119,8 +116,10 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
                     lam = c+beta*H;
         
                     E = exp(-(dt)*lam);
+
+                    % Semi-analytic update for $Q$ using integrating factor
                     Qnew = E.*Q+(1-E).*(c./lam);
-        
+
                     Rexp = (dt)*(beta*QHu-gamma*A.*(1-Q));
                     Anew = LAdec\(A+Rexp);
         
@@ -131,13 +130,11 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
                 velocity(j,i) = abs(dcom)/dt;
                 drift(j,i) = com_total;
 
-                iter = iter + 1;
+                % Percentage completed and toal elapsed time tracking.
+                iter = iter+1;
                 elapsedtime = toc(starttime);
                 percent = (iter/totaliterations)*100;
-                totaltime = elapsedtime/iter*totaliterations;
-                remainingtime = totaltime-elapsedtime;
-
-                fprintf('\rProgress: %6.2f%% | Elapsed: %6.1fs | Estimated Remaining Time: %6.1fs',percent, elapsedtime, remainingtime);
+                fprintf('\rProgress: %.1f%% Time Elapsed: %.1fs',percent, elapsedtime);
             end
         end
     else
@@ -155,13 +152,13 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
 
                 gamma = gamma_vals(i);
             
-                Delta_prev = 1.5; % Initial guess is for larger bump 
+                Delta_prev = 1.5; % Initial guess for bump half-with. Steup for the larger bump 
             
                 for j = 1:length(beta_vals)
                    
                     beta = beta_vals(j);
             
-                    % Solve for $\Delta$
+                    % Solve for bump half-width
                     f = @(delta) czero(delta,beta,gamma).*sin(2*delta)-theta;
                     Delta = fzero(f,Delta_prev);
                     Delta_prev = Delta;
@@ -171,7 +168,7 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
                     A0 = kappa*(1-c0);
                     epsilon = 0.05*(2*c0*sin(Delta));  %Perturbation size epsilon taken to be 0.05 of maximum height stationary solution
             
-                    % Initial conditions
+                    % Initial conditions taken to be the stationary solution with a perturbation just to the activity variable
                     U = (2*c0*sin(Delta))*cosx+epsilon*sin(x);
                     A = A0;
                     Q = c0*((x>-Delta)&(x<Delta))+((x>Delta)|(x<-Delta));
@@ -193,6 +190,7 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
             
                         fcos = cx*QHu;
                         fsin = sx*QHu;
+
                         Unew = (1-dt)*U+dt*(fcos*cosx+fsin*sinx);
             
                         % Update center of mass and compute speed.
@@ -214,8 +212,10 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
                         lam = c+beta*H;
             
                         E = exp(-(dt)*lam);
+                        
+                        % Semi-analytic update for $Q$ using integrating factor
                         Qnew = E.*Q+(1-E).*(c./lam);
-            
+
                         Rexp = (dt)*(beta*QHu-gamma*A.*(1-Q));
                         Anew = LAdec\(A+Rexp);
             
@@ -223,20 +223,18 @@ function [velocity, drift] = numericalphase(beta_vals,D_vals,gamma_vals,theta,N,
                         A = Anew;
                         Q = Qnew;
                     end
+                    
                     velocity(j,i) = abs(dcom)/dt;
                     drift(j,i) = com_total;
-
-                    iter = iter + 1;
+    
+                    % Percentage completed and toal elapsed time tracking.
+                    iter = iter+1;
                     elapsedtime = toc(starttime);
                     percent = (iter/totaliterations)*100;
-                    totaltime = elapsedtime/iter*totaliterations;
-                    remainingtime = totaltime-elapsedtime;
-
-                    fprintf('\rProgress: %6.2f%% | Elapsed: %6.1fs | Estimated Remaining Time: %6.1fs',percent, elapsedtime, remainingtime);
+                    fprintf('\rProgress: %.1f%% Time Elapsed: %.1fs',percent, elapsedtime);
                 end
          end
     end
-    fprintf('\nTime elapsed: %.0f seconds\n',toc(starttime));
 end
 
 

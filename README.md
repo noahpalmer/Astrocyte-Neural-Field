@@ -7,9 +7,9 @@ The code within this repository can be used to simulate and analyze stationary b
 - astrocyte_neural_field_sim.m :
   Contains the finite difference scheme used to verify the existence of stationary bump solutions as well as run simulations with a small perturbation.
 - numericalphase.m :
-  Contains the code necessary to numerically simulate small perturbations to stationary bump solutions in various   parameter regimes. Returns bump velocity and drift.
+  Contains the code necessary to numerically simulate small perturbations to stationary bump solutions in various parameter regimes. Returns bump velocity and drift.
 - analyticphase.m :
-  Contains code to numerically estimate the boundary between unstable and stbale regions for both finite        diffusion and the large diffusion limit, using the Evans function derived in Sections 4.5 and 4.6.1 of the paper.
+  Contains code to numerically estimate the boundary between unstable and stable regions for both finite diffusion and the large diffusion limit, using the Evans functions derived in Sections 4.5 and 4.6.1 of the paper.
 - fourierphase.m :
   Estimates the stability boundaries for finite diffusion using a low-Fourier mode truncation method outlined in Section 5.3.
 - detcomp.m :

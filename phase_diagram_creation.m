@@ -64,7 +64,7 @@ set(gca,'YDir','normal')
 colormap([linspace(1,0,256)' linspace(1,0,256)' ones(256,1)])
 colorbar;
 contour(D_vals,beta_vals,phaseD,[0 0],'k-','LineWidth',3);
-contour(D_vals,beta_vals,stabelvalsD,[0.1 0.1],'k--','LineWidth',3);
+contour(D_vals,beta_vals,stablevalsD,[0.1 0.1],'k--','LineWidth',3);
 ylim([0.001,0.1])
 
 figure;
@@ -73,7 +73,7 @@ set(gca,'YDir','normal')
 colormap([ones(256,1) linspace(1,0,256)' linspace(1,0,256)'])  
 colorbar;
 contour(D_vals,beta_vals,phaseD,[0 0],'k-','LineWidth',3);
-contour(D_vals,beta_vals,stabelvalsD,[0.1 0.1],'k--','LineWidth',3);
+contour(D_vals,beta_vals,stablevalsD,[0.1 0.1],'k--','LineWidth',3);
 ylim([0.001,0.1])
 
 figure;
@@ -91,7 +91,7 @@ set(gca,'YDir','normal')
 colormap([ones(256,1) linspace(1,0,256)' linspace(1,0,256)'])  
 colorbar;
 contour(gamma_vals,beta_vals,phasegamma,[0 0],'k-','LineWidth',3);
-contour(gamma_vals,beta_vals,stabelvalsgamma,[0.1 0.1],'k--','LineWidth',3);
+contour(gamma_vals,beta_vals,stablevalsgamma,[0.1 0.1],'k--','LineWidth',3);
 ylim([0.001,0.1])
 
 

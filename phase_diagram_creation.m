@@ -27,8 +27,7 @@ theta = 0.1;
 
 % Computes a phase diagram using the Fourier truncation method. Returns a
 % binary matrix with 1s for unstable locations in parameters space and 0s
-% for stable locations. Last argument of the function tells it whether the
-% phase diagram is (D,beta): 1 or (gamma,beta): 2.
+% for stable locations. 
 
 stablevalsD = fourierphase(beta_vals,D_vals,gamma,theta,tol);
 stablevalsgamma = fourierphase(beta_vals,D,gamma_vals,theta,tol);
